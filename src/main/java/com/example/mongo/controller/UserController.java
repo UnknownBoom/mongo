@@ -20,7 +20,7 @@ public class UserController {
     }
 
     @GetMapping("comment/{message}")
-    public Collection<UserDto> findByCommentMessage(@PathVariable String message) {
+    public Collection<User> findByCommentMessage(@PathVariable String message) {
         return userDao.findByCommentMessage(message);
     }
 

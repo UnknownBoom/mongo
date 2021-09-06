@@ -25,7 +25,6 @@ import java.util.Objects;
 @Repository
 public class UserDaoImpl {
     private final MongoTemplate mongoTemplate;
-    private final CommentDaoImpl commentDao;
 
 
     private Criteria byUsername(String username) {
@@ -44,13 +43,6 @@ public class UserDaoImpl {
     }
 
     public User save(User user) {
-        if (user.getComments() != null) {
-            commentDao.saveAll(user.getComments());
-        }
-
-        if (user.getComment() != null) {
-            commentDao.save(user.getComment());
-        }
 
         return mongoTemplate.save(user);
     }
@@ -68,13 +60,10 @@ public class UserDaoImpl {
         return mongoTemplate.findAndRemove(byUsername, User.class);
     }
 
-    public List<UserDto> findByCommentMessage(String message) {
-        Aggregation aggregation = Aggregation.newAggregation(
-          Aggregation.unwind("$comment"),
-                Aggregation.match(Criteria.where("comment.$message").is(message))
-        );
+    public List<User> findByCommentMessage(String message) {
+        Query query = new Query().addCriteria(Criteria.where("comments").elemMatch(Criteria.where("message").is(message)));
 
-        return mongoTemplate.aggregate(aggregation,User.class,UserDto.class).getMappedResults();
+        return mongoTemplate.find(query,User.class);
     }
 }
 

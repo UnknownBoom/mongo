@@ -23,8 +23,6 @@ public class User {
     @Indexed(unique = true)
     private String username;
     private int age;
-    @DBRef
     private List<Comment> comments;
-    @DBRef
     private Comment comment;
 }
