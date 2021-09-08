@@ -25,4 +25,5 @@ public class User {
     private int age;
     private List<Comment> comments;
     private Comment comment;
+    private String group;
 }
