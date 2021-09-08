@@ -5,6 +5,8 @@ import com.example.mongo.domain.dto.UserAvgDto;
 import com.example.mongo.domain.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -65,7 +67,7 @@ public class UserDaoImpl {
         if(Objects.nonNull(fields)){
             Criteria criteria = Criteria.where("comments").elemMatch(Criteria.where("message").is(message));
             MatchOperation match = Aggregation.match(criteria);
-            Aggregation aggregation = Aggregation.newAggregation(match,Aggregation.project(fields.toArray(new String[1])));
+            Aggregation aggregation = Aggregation.newAggregation(match,Aggregation.project(fields.toArray(String[]::new)));
             return  mongoTemplate.aggregate(aggregation,User.class,User.class).getMappedResults();
         }else
         return mongoTemplate.find(query, User.class);
@@ -113,6 +115,14 @@ public class UserDaoImpl {
     public Collection<User> findText(String textToSearch) {
         TextQuery textQuery = TextQuery.queryText(new TextCriteria().matchingAny(textToSearch)).sortByScore();
         return  mongoTemplate.find(textQuery,User.class);
+    }
+
+    public void removeAll() {
+        mongoTemplate.remove(new Query(),User.class);
+    }
+
+    public Collection<User> insertAll(List<User> users) {
+        return mongoTemplate.insertAll(users);
     }
 }
 
