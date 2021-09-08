@@ -6,17 +6,14 @@ import com.example.mongo.domain.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
-import org.springframework.data.mongodb.core.aggregation.GroupOperation;
-import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.TextCriteria;
+import org.springframework.data.mongodb.core.query.TextQuery;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -63,8 +60,14 @@ public class UserDaoImpl {
         return mongoTemplate.findAndRemove(byUsername, User.class);
     }
 
-    public List<User> findByCommentMessage(String message) {
+    public List<User> findByCommentMessageWithFields(String message, List<String> fields) {
         Query query = new Query().addCriteria(Criteria.where("comments").elemMatch(Criteria.where("message").is(message)));
+        if(Objects.nonNull(fields)){
+            Criteria criteria = Criteria.where("comments").elemMatch(Criteria.where("message").is(message));
+            MatchOperation match = Aggregation.match(criteria);
+            Aggregation aggregation = Aggregation.newAggregation(match,Aggregation.project(fields.toArray(new String[1])));
+            return  mongoTemplate.aggregate(aggregation,User.class,User.class).getMappedResults();
+        }else
         return mongoTemplate.find(query, User.class);
     }
 
@@ -84,6 +87,32 @@ public class UserDaoImpl {
         AggregationOperation avg = Aggregation.group().avg("age").as("ageAvg");
         Aggregation aggregation = Aggregation.newAggregation(avg);
         return mongoTemplate.aggregate(aggregation, User.class, Object.class).getMappedResults();
+    }
+
+    public List<Object> groupBy(List<String> fields) {
+        Aggregation aggregation = Aggregation.newAggregation(Aggregation.group(fields.toArray(new String[1])));
+        return mongoTemplate.aggregate(aggregation,User.class, Object.class).getMappedResults();
+    }
+
+    public List<User> filterBy(Map<String,String> filterMap) {
+        Query query = new Query();
+        Criteria criteria;
+        for (Map.Entry<String, String> filter : filterMap.entrySet()) {
+            try{
+                int i = Integer.parseInt(filter.getValue());
+                criteria = Criteria.where(filter.getKey()).is(i);
+            }catch (Exception e){
+                criteria = Criteria.where(filter.getKey()).is(filter.getValue());
+            }
+
+            query = query.addCriteria(criteria);
+        }
+        return mongoTemplate.find(query,User.class);
+    }
+
+    public Collection<User> findText(String textToSearch) {
+        TextQuery textQuery = TextQuery.queryText(new TextCriteria().matchingAny(textToSearch)).sortByScore();
+        return  mongoTemplate.find(textQuery,User.class);
     }
 }
 

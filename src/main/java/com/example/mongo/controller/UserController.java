@@ -6,7 +6,11 @@ import com.example.mongo.domain.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import javax.websocket.server.PathParam;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/")
@@ -20,8 +24,8 @@ public class UserController {
     }
 
     @GetMapping("comment/{message}")
-    public Collection<User> findByCommentMessage(@PathVariable String message) {
-        return userDao.findByCommentMessage(message);
+    public Collection<User> findByCommentMessage(@PathVariable String message, @RequestParam(value = "fields",required = false) List<String> fields) {
+        return userDao.findByCommentMessageWithFields(message,fields);
     }
 
     @GetMapping("")
@@ -59,8 +63,18 @@ public class UserController {
         return userDao.avgAge();
     }
 
+    @GetMapping("filter")
+    public Collection<User> groupBy(@RequestParam Map<String,String> filterMap) {
+        return userDao.filterBy(filterMap);
+    }
+
     @DeleteMapping("/username/{username}")
     public User delete(@PathVariable String username) {
         return userDao.deleteByUsername(username);
+    }
+
+    @GetMapping("/text/{text}")
+    public Collection<User> findText(@PathVariable String text) {
+        return userDao.findText(text);
     }
 }
