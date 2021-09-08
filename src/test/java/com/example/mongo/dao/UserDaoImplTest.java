@@ -3,7 +3,6 @@ package com.example.mongo.dao;
 import com.example.mongo.domain.model.Comment;
 import com.example.mongo.domain.model.User;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @SpringBootTest
@@ -24,7 +22,7 @@ class UserDaoImplTest {
     @Autowired
     private UserDaoImpl userDao;
 
-    private List<User> users = new ArrayList<>(){{
+    private List<User> users = new ArrayList<>() {{
         add(User.builder()
                 .username("test1")
                 .age(60)
@@ -55,7 +53,7 @@ class UserDaoImplTest {
     }};
 
     @BeforeEach
-    private void init(){
+    private void init() {
         userDao.removeAll();
         List<User> newUsers = users.stream().map(User::new).collect(Collectors.toList());
         userDao.insertAll(newUsers);
@@ -66,6 +64,7 @@ class UserDaoImplTest {
         User no_name = userDao.findByUsername("No name");
         assertNull(no_name);
     }
+
     @Test
     void findByUsernameShouldEquals() {
         String username = "test1";
@@ -90,14 +89,14 @@ class UserDaoImplTest {
                 .username("test123")
                 .build();
         User save = userDao.save(new User(userToSave));
-        Assertions.assertThat(save).isEqualToIgnoringGivenFields(save,"id");
+        Assertions.assertThat(save).isEqualToIgnoringGivenFields(save, "id");
     }
 
     @Test
     void deleteByUsername() {
         String username = "test2";
         userDao.deleteByUsername(username);
-        Collection<User> filtered = users.stream().filter(t->!username.equals(t.getUsername())).collect(Collectors.toList());
+        Collection<User> filtered = users.stream().filter(t -> !username.equals(t.getUsername())).collect(Collectors.toList());
         Collection<User> all = userDao.findAll();
         Assertions.assertThat(filtered)
                 .usingRecursiveFieldByFieldElementComparatorIgnoringFields("id")

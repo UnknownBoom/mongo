@@ -36,11 +36,6 @@ public class UserController {
         return userDao.findField(field);
     }
 
-    @GetMapping("test")
-    public Collection<Object> findAllWithField() {
-        return userDao.test();
-    }
-
     @PostMapping("")
     public User saveUser(@RequestBody User user) {
         return userDao.save(user);
