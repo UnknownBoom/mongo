@@ -97,7 +97,7 @@ public class UserDaoImpl {
     public List<User> filterBy(Map<String,String> filterMap) {
         Query query = new Query();
         Criteria criteria;
-        for (Map.Entry<String, String> filter : filterMap.entrySet()) {
+        for (var filter : filterMap.entrySet()) {
             try{
                 int i = Integer.parseInt(filter.getValue());
                 criteria = Criteria.where(filter.getKey()).is(i);

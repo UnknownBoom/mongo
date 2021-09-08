@@ -29,4 +29,6 @@ public class User {
     private String group;
     @TextIndexed
     private String largeText;
+    @TextIndexed(weight = 2)
+    private String secondLargeText;
 }
